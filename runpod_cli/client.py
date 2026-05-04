@@ -1,7 +1,5 @@
 """RunPod API client for serverless endpoints."""
 
-from typing import Optional
-
 import requests
 
 
