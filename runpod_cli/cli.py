@@ -123,12 +123,32 @@ def image():
 @click.option("--prompt", "-p", required=True, help="Editing instructions")
 @click.option("--image-url", "-i", multiple=True, required=True, help="Image URL(s) to edit (up to 4)")
 @click.option("--safety-checker", is_flag=True, default=False, help="Enable safety checker")
+@click.option(
+    "--output-format",
+    type=click.Choice(["png", "jpeg", "webp"]),
+    help="Output image format",
+)
+@click.option("--aspect-ratio", help="Output aspect ratio (e.g. 16:9, 1:1, 4:3)")
+@click.option("--num-images", type=int, help="Number of images to generate (batch size)")
+@click.option("--seed", type=int, help="Random seed for reproducibility")
 @click.option("--endpoint-id", default=DEFAULT_IMAGE_ENDPOINT, help="Override endpoint ID")
 @click.option("--output", "-o", help="Save result JSON to file")
 @click.option("--raw-input", help="Pass raw JSON input (overrides other options)")
 @click.pass_context
 @handle_errors
-def image_edit(ctx, prompt, image_url, safety_checker, endpoint_id, output, raw_input):
+def image_edit(
+    ctx,
+    prompt,
+    image_url,
+    safety_checker,
+    output_format,
+    aspect_ratio,
+    num_images,
+    seed,
+    endpoint_id,
+    output,
+    raw_input,
+):
     """Edit images using the nano-banana-2-edit endpoint.
 
     Example:
@@ -145,6 +165,14 @@ def image_edit(ctx, prompt, image_url, safety_checker, endpoint_id, output, raw_
         }
         if safety_checker:
             input_data["enable_safety_checker"] = True
+        if output_format:
+            input_data["output_format"] = output_format
+        if aspect_ratio:
+            input_data["aspect_ratio"] = aspect_ratio
+        if num_images is not None:
+            input_data["num_images"] = num_images
+        if seed is not None:
+            input_data["seed"] = seed
 
     click.echo(f"🎨 Sending request to {endpoint_id}...")
     result = client.run_sync(endpoint_id, input_data)
@@ -166,12 +194,29 @@ def video():
 @video.command("generate")
 @click.option("--prompt", "-p", required=True, help="Video generation prompt")
 @click.option("--image-url", "-i", required=True, help="Source image URL")
+@click.option("--num-frames", type=int, help="Number of frames to generate")
+@click.option("--fps", type=int, help="Frames per second")
+@click.option("--resolution", help="Video resolution (e.g. 720p, 1080p)")
+@click.option("--aspect-ratio", help="Aspect ratio (e.g. 16:9, 9:16, 1:1)")
+@click.option("--seed", type=int, help="Random seed for reproducibility")
 @click.option("--endpoint-id", default=DEFAULT_VIDEO_ENDPOINT, help="Override endpoint ID")
 @click.option("--output", "-o", help="Save result JSON to file")
 @click.option("--raw-input", help="Pass raw JSON input (overrides other options)")
 @click.pass_context
 @handle_errors
-def video_generate(ctx, prompt, image_url, endpoint_id, output, raw_input):
+def video_generate(
+    ctx,
+    prompt,
+    image_url,
+    num_frames,
+    fps,
+    resolution,
+    aspect_ratio,
+    seed,
+    endpoint_id,
+    output,
+    raw_input,
+):
     """Generate video from an image using the veo3-1-fast-i2v endpoint.
 
     Example:
@@ -186,6 +231,16 @@ def video_generate(ctx, prompt, image_url, endpoint_id, output, raw_input):
             "prompt": prompt,
             "image_url": image_url,
         }
+        if num_frames is not None:
+            input_data["num_frames"] = num_frames
+        if fps is not None:
+            input_data["fps"] = fps
+        if resolution:
+            input_data["resolution"] = resolution
+        if aspect_ratio:
+            input_data["aspect_ratio"] = aspect_ratio
+        if seed is not None:
+            input_data["seed"] = seed
 
     click.echo(f"🎬 Sending request to {endpoint_id}...")
     result = client.run_sync(endpoint_id, input_data)
