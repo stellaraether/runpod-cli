@@ -128,6 +128,7 @@ def image():
     type=click.Choice(["png", "jpeg", "webp"]),
     help="Output image format",
 )
+@click.option("--resolution", help="Output resolution (e.g. 1024x1024, 512x512)")
 @click.option("--aspect-ratio", help="Output aspect ratio (e.g. 16:9, 1:1, 4:3)")
 @click.option("--num-images", type=int, help="Number of images to generate (batch size)")
 @click.option("--seed", type=int, help="Random seed for reproducibility")
@@ -142,6 +143,7 @@ def image_edit(
     image_url,
     safety_checker,
     output_format,
+    resolution,
     aspect_ratio,
     num_images,
     seed,
@@ -167,6 +169,8 @@ def image_edit(
             input_data["enable_safety_checker"] = True
         if output_format:
             input_data["output_format"] = output_format
+        if resolution:
+            input_data["resolution"] = resolution
         if aspect_ratio:
             input_data["aspect_ratio"] = aspect_ratio
         if num_images is not None:
