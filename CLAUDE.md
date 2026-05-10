@@ -84,16 +84,31 @@ runpod video generate         # Generate video from image (default endpoint: goo
 runpod job submit/status/cancel  # Async job management for any endpoint
 ```
 
+Job submit accepts inline JSON or `@file.json`:
+```bash
+runpod job submit my-endpoint-id '{"prompt": "hello"}'
+runpod job submit my-endpoint-id @input.json
+```
+
 ### Error Handling
 
 All commands use the `@handle_errors` decorator in `cli.py`. It catches `requests.HTTPError` and prints the response body, then aborts with `click.Abort()`.
+
+### Shared Context
+
+Commands receive a Click `Context` whose `obj` dict lazily holds:
+- `client` — a `RunPodClient` instance (requires configured API key)
+- `config` — a `Config` instance
+- `config_path` — optional override from `--config`
+
+Use `_get_client(ctx)` and `_get_config(ctx)` in new commands rather than instantiating directly.
 
 ## CI/CD
 
 GitHub Actions workflows in `.github/workflows/`:
 - `test.yml` - Runs on PRs and main: build check, pre-commit, tests across Python 3.8-3.12, coverage upload.
 - `auto-release.yml` - Runs on main push: tags a release from `runpod_cli/__init__.py` `__version__`, creates GitHub release, publishes to PyPI via `PYPI_API_TOKEN` secret.
-- `check-version-bump.yml` - Ensures version bump PRs only touch allowed files.
+- `check-version-bump.yml` - Ensures version bump PRs only touch allowed files (`__init__.py`, `cli.py`, `setup.py`, `pyproject.toml`, `CLAUDE.md`, `.gitignore`, `tests/`, workflow files).
 
 ## Configuration
 
